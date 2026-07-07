@@ -112,7 +112,10 @@ function Index() {
     setLoading(true);
     try {
       const share = buildShareUrl(target);
-      const dataUrl = await makeQr(share, fg, bg);
+      // QR encodes the destination URL directly so scanning always works,
+      // regardless of where this app is hosted. The /qr/$id share URL is a
+      // separate human-shareable landing page.
+      const dataUrl = await makeQr(target, fg, bg);
       setQr(dataUrl);
       setFinalUrl(target);
       setShareUrl(share);
