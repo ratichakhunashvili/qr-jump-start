@@ -11,10 +11,10 @@ export const Route = createFileRoute("/")({
         content:
           "Paste a website URL and instantly generate a unique, scannable QR code that links straight back to it.",
       },
-      { property: "og:title", content: "QR Code Generator" },
+      { property: "og:title", content: "QR Code Generator — Turn any URL into a QR code" },
       {
         property: "og:description",
-        content: "Paste a URL, get a scannable QR code instantly.",
+        content: "Paste a website URL and instantly generate a unique, scannable QR code that links straight back to it.",
       },
     ],
   }),
