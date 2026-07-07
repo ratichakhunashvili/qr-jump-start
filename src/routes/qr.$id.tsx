@@ -1,31 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
 import { decodeDestination } from "@/lib/qr-encoding";
 
 export const Route = createFileRoute("/qr/$id")({
-  head: () => ({
-    meta: [
-      { title: "Opening link…" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: QrRedirect,
+  head: ({ params }) => {
+    const dest = decodeDestination(params.id);
+    return {
+      meta: [
+        { title: dest ? `Open ${safeHost(dest)}` : "Invalid QR link" },
+        { name: "robots", content: "noindex" },
+      ],
+    };
+  },
+  component: QrLanding,
 });
 
-function QrRedirect() {
-  const { id } = Route.useParams();
-  const destination = useMemo(() => decodeDestination(id), [id]);
-  const [redirected, setRedirected] = useState(false);
+function safeHost(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "link";
+  }
+}
 
-  useEffect(() => {
-    if (destination) {
-      const t = setTimeout(() => {
-        setRedirected(true);
-        window.location.replace(destination);
-      }, 400);
-      return () => clearTimeout(t);
-    }
-  }, [destination]);
+function QrLanding() {
+  const { id } = Route.useParams();
+  const destination = decodeDestination(id);
 
   if (!destination) {
     return (
@@ -33,7 +32,7 @@ function QrRedirect() {
         <div className="max-w-md text-center">
           <h1 className="text-2xl font-bold">Invalid QR link</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            This shareable QR link is malformed or has been tampered with.
+            This shareable link is malformed.
           </p>
           <Link
             to="/"
@@ -47,24 +46,31 @@ function QrRedirect() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-2xl font-bold">
-          {redirected ? "Redirecting…" : "Opening link…"}
+    <main className="min-h-screen flex items-center justify-center bg-background text-foreground px-4 py-12">
+      <div className="w-full max-w-md text-center">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          Shared link
+        </p>
+        <h1 className="mt-2 text-2xl font-bold break-all">
+          {safeHost(destination)}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground break-all">
-          Taking you to{" "}
-          <a href={destination} className="underline">
-            {destination}
-          </a>
+          {destination}
         </p>
-        <p className="mt-6 text-xs text-muted-foreground">
-          Not redirected automatically?{" "}
-          <a href={destination} className="underline">
-            Click here
-          </a>
-          .
-        </p>
+        <a
+          href={destination}
+          className="mt-6 inline-flex items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Open link
+        </a>
+        <div className="mt-6">
+          <Link
+            to="/"
+            className="text-xs text-muted-foreground hover:text-foreground underline"
+          >
+            Create your own QR code
+          </Link>
+        </div>
       </div>
     </main>
   );
